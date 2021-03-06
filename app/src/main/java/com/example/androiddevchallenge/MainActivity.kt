@@ -18,11 +18,25 @@ package com.example.androiddevchallenge
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.example.androiddevchallenge.ui.theme.MyTheme
 
 class MainActivity : AppCompatActivity() {
@@ -40,7 +54,40 @@ class MainActivity : AppCompatActivity() {
 @Composable
 fun MyApp() {
     Surface(color = MaterialTheme.colors.background) {
-        Text(text = "Ready... Set... GO!")
+        HelloScreen()
+    }
+}
+
+@Composable
+fun HelloScreen(helloViewModel: HelloViewModel = HelloViewModel()) {
+    val name: String by helloViewModel.name.observeAsState("")
+    HelloContent(name = name, onNameChange = { helloViewModel.onNameChanged(it) })
+}
+
+@Composable
+fun HelloContent(name: String, onNameChange: (String) -> Unit) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        if (name.isNotEmpty()) {
+            Text(
+                text = "Hello, $name",
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.h5
+            )
+        }
+        OutlinedTextField(
+            value = name,
+            onValueChange = { onNameChange(it) },
+            label = { Text("Name") }
+        )
+    }
+}
+
+class HelloViewModel : ViewModel() {
+    private val _name = MutableLiveData("")
+    val name: LiveData<String> = _name
+
+    fun onNameChanged(newName: String) {
+        _name.value = newName
     }
 }
 
